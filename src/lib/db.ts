@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 
 let db: any;
 
@@ -7,9 +8,18 @@ export function getDb() {
   if (!db) {
     try {
       const Database = require('better-sqlite3');
-      const dataDir = path.join(process.cwd(), 'data');
       
-      // Criar diretório data se não existir
+      // Em produção (Vercel), usar /tmp; localmente usar ./data
+      let dataDir: string;
+      if (process.env.VERCEL || process.env.VERCEL_ENV) {
+        // Ambiente Vercel - usar diretório temporário
+        dataDir = path.join('/tmp', 'mural-data');
+      } else {
+        // Desenvolvimento local
+        dataDir = path.join(process.cwd(), 'data');
+      }
+      
+      // Criar diretório se não existir
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
       }
@@ -17,6 +27,7 @@ export function getDb() {
       const dbPath = path.join(dataDir, 'app.db');
       db = new Database(dbPath);
       db.pragma('journal_mode = WAL');
+      db.pragma('synchronous = NORMAL');
       initializeDb();
     } catch (error) {
       console.error('Database initialization error:', error);

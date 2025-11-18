@@ -27,7 +27,11 @@ const nextConfig: NextConfig = {
         }
       ]
     }
-  ]
+  ],
+  // Configurações para Vercel
+  experimental: {
+    serverComponentsExternalPackages: ['better-sqlite3']
+  }
 };
 
 export default nextConfig;
